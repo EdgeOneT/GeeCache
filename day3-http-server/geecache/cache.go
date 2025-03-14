@@ -1,5 +1,7 @@
 package geecache
 
+// 并发控制
+
 import (
 	"geecache/lru"
 	"sync"
