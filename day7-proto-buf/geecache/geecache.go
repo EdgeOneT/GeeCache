@@ -3,6 +3,7 @@ package geecache
 // 负责与外部交互，控制缓存存储和获取的主流程
 import (
 	"fmt"
+	pb "geecache/geecachepb"
 	"geecache/singleflight"
 	"log"
 	"sync"
@@ -104,11 +105,16 @@ func (g *Group) load(key string) (value ByteView, err error) {
 
 // 使用实现了 PeerGetter 接口的 httpGetter 从访问远程节点，获取缓存值
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
-	bytes, err := peer.Get(g.name, key)
+	req := &pb.Request{
+		Group: g.name,
+		Key:   key,
+	}
+	res := &pb.Response{}
+	err := peer.Get(req, res)
 	if err != nil {
 		return ByteView{}, err
 	}
-	return ByteView{b: bytes}, nil
+	return ByteView{b: res.Value}, nil
 }
 
 // 从本地数据源加载数据的具体实现
